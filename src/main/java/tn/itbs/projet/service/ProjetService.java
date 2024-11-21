@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tn.itbs.projet.feign.MicroserviceUtilisateur;
 import tn.itbs.projet.model.Projet;
+import tn.itbs.projet.model.Utilisateur;
 import tn.itbs.projet.repository.ProjetRepository;
 
 import java.util.Optional;
@@ -15,6 +17,9 @@ public class ProjetService {
 
     @Autowired
     private ProjetRepository projetRepository;
+
+    @Autowired
+    private MicroserviceUtilisateur microserviceUtilisateur;
     /**
      * @param projet
      * @return ResponseEntity
@@ -34,7 +39,18 @@ public class ProjetService {
      * @return The projet with id $idProjet if it exists
      */
     public Optional<Projet> chercher(int idProjet) {
-        return projetRepository.findById(idProjet);
+        Optional<Projet> projet = projetRepository.findById(idProjet);
+        if (projet.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Projet inexistant");
+        }
+        Optional<Utilisateur> utilisateur = microserviceUtilisateur.chercher(projet.get().getId_utilisateur());
+        if (utilisateur.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur lié au projet inexistant");
+        }
+
+        projet.get().setUtilisateur(utilisateur.get());
+        return projet;
+
     }
 
     /**

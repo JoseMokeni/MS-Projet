@@ -28,7 +28,7 @@ public class Projet {
     private Utilisateur utilisateur;
 
     @OneToMany(mappedBy =  "projet")
-    private ArrayList<Tache> taches = new ArrayList<Tache>();
+    private List<Tache> taches = new ArrayList<Tache>();
 
 
 }
